@@ -1,5 +1,16 @@
 #! /usr/bin/env bash
 
+ENV_FILE="$(dirname "$0")/../.env"
+
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  source "$ENV_FILE"
+  set +a
+else
+  echo "Error: $ENV_FILE not found" >&2
+  exit 1
+fi
+
 DOCKER_REGISTRY=${DOCKER_REGISTRY}
 VERSION=$(jq -r .version package.json)
 IMAGE=$(jq -r .name package.json)
