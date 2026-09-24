@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ttrpgwith.me/entity.json",
+  "title": "Entity",
+  "description": "A generic data storage object representing a TTRPG entity (character, monster, item, spell, etc.) with metadata and extended property syntax.",
+  "type": "object",
+  "required": [
+    "uuid",
+    "ruleset_id",
+    "entity_type",
+    "display_name",
+    "properties"
+  ],
+  "properties": {
+    "uuid": {
+      "type": "string",
+      "description": "Unique identifier for this entity instance. Typically a UUIDv4 or unique string."
+    },
+    "ruleset_id": {
+      "type": "string",
+      "description": "Identifier (slug or UUID) of the ruleset to which this entity belongs (e.g. 'open5e')."
+    },
+    "entity_type": {
+      "type": "string",
+      "description": "The specific entity type defined in the ruleset (e.g. 'character', 'monster', 'item', 'spell')."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "The human-readable name of the entity, used for lists, headers, and UI displays."
+    },
+    "description": {
+      "type": "string",
+      "description": "An optional summary or description of the entity."
+    },
+    "version": {
+      "type": "string",
+      "description": "Version identifier for this entity data format or record."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this entity was created."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when this entity was last modified."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Optional array of string tags for filtering, grouping, or search.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "template_id": {
+      "type": "string",
+      "description": "Optional override of the default template used to render or edit this entity."
+    },
+    "properties": {
+      "type": "object",
+      "description": "The specific properties of the entity, supporting primitives, nested objects, arrays, and extended property objects with calculated expressions.",
+      "additionalProperties": {
+        "$ref": "#/$defs/propertyValue"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "primitiveValue": {
+      "description": "A primitive scalar value.",
+      "type": ["string", "number", "boolean", "null"]
+    },
+    "modifier": {
+      "description": "A modifier applied to a property value (e.g. bonuses, penalties, equipment effects).",
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "The origin of the modifier (e.g. 'Ring of Protection', 'Racial Trait', 'Bless')."
+        },
+        "value": {
+          "description": "The modifier value (numeric delta, multiplier, or replacement).",
+          "type": ["number", "string", "boolean"]
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of modifier (e.g. 'bonus', 'penalty', 'override', 'multiplier', 'advantage')."
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether this modifier is currently active and applied to the calculated value.",
+          "default": true
+        },
+        "description": {
+          "type": "string",
+          "description": "Explanation or context for this modifier."
+        }
+      },
+      "additionalProperties": true
+    },
+    "extendedProperty": {
+      "description": "An extended property object capable of holding base values, calculated expressions, modifiers, bounds, and metadata.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "description": "The current, resolved, or evaluated value."
+        },
+        "base": {
+          "description": "The base/unmodified value before expressions or modifiers are applied."
+        },
+        "expr": {
+          "type": "string",
+          "description": "Math, logical, or string expression to compute calculated fields (e.g. 'floor((strength - 10) / 2)')."
+        },
+        "formula": {
+          "type": "string",
+          "description": "Alias for expr defining a calculation formula."
+        },
+        "modifiers": {
+          "type": "array",
+          "description": "List of active or inactive modifiers affecting this property.",
+          "items": {
+            "$ref": "#/$defs/modifier"
+          }
+        },
+        "override": {
+          "description": "Manual user override value or boolean indicator."
+        },
+        "min": {
+          "type": "number",
+          "description": "Minimum allowed value for numeric properties."
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum allowed value for numeric properties."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit of measurement (e.g. 'gp', 'ft', 'lbs', 'slots')."
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label for display in UI or sheets."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Arbitrary metadata for custom engine or UI hooks."
+        }
+      },
+      "additionalProperties": true
+    },
+    "propertyValue": {
+      "description": "A property value may be a primitive, an extended property object with calculation syntax, an array of property values, or a nested object of properties.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/primitiveValue"
+        },
+        {
+          "$ref": "#/$defs/extendedProperty"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/propertyValue"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/propertyValue"
+          }
+        }
+      ]
+    }
+  }
+}

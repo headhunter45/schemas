@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ttrpgwith.me/entity-definition.json",
+  "title": "RulesetEntityDefinition",
+  "description": "Schema for an entity definition file inside a ruleset (e.g. rulesets/open5e/entities/character.json), defining entity metadata, property schemas, calculations, and default values.",
+  "type": "object",
+  "required": ["id", "name", "schema"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Entity type identifier matching the ruleset manifest (e.g. 'character', 'monster', 'spell', 'item')."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the entity type (e.g. 'Player Character')."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this entity represents."
+    },
+    "ruleset_id": {
+      "type": "string",
+      "description": "Identifier of the ruleset to which this entity type belongs (e.g. 'open5e')."
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of this entity definition schema."
+    },
+    "default_template": {
+      "type": "string",
+      "description": "Identifier of the default template (mode 'sheet'/'view'/'card'/'print') used to display entities of this type."
+    },
+    "allowed_templates": {
+      "type": "array",
+      "description": "Template IDs that are compatible with this entity type.",
+      "items": { "type": "string" }
+    },
+    "default_editor": {
+      "type": "string",
+      "description": "Identifier of the default template (mode 'edit') used to author/edit entities of this type. Must match a manifest template entry whose 'mode' is 'edit' and whose 'entity_types' includes this entity's id."
+    },
+    "schema": {
+      "type": "object",
+      "description": "A JSON Schema describing the structure, types, and constraints of the entity's 'properties' object.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "default": "object"
+        },
+        "properties": {
+          "type": "object",
+          "description": "Property definitions for this entity type."
+        },
+        "required": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "calculated_properties": {
+      "type": "object",
+      "description": "Standard calculation rules or formulas for derived entity properties.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["expr"],
+        "properties": {
+          "expr": {
+            "type": "string",
+            "description": "Expression (math, logical, or string) defining how this property is derived."
+          },
+          "type": {
+            "type": "string",
+            "description": "Resulting data type of the calculation."
+          },
+          "dependencies": {
+            "type": "array",
+            "description": "Names of properties this calculation depends on.",
+            "items": { "type": "string" }
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the calculation formula."
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "default_values": {
+      "type": "object",
+      "description": "Initial default values for properties when instantiating a new entity of this type.",
+      "additionalProperties": true
+    },
+    "ui": {
+      "$ref": "#/$defs/uiFieldDescriptor",
+      "description": "Optional recursive UI/editor metadata: widget assignments, field groupings, and display hints used by 'edit' mode templates to render this entity's form."
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "uiFieldDescriptor": {
+      "type": "object",
+      "description": "UI/editor layout and widget assignment for an entity or a single property. Recurses via 'fields' to describe nested object properties.",
+      "properties": {
+        "widget": {
+          "type": "string",
+          "description": "ID of an editor widget template (a manifest template with mode 'widget') that renders this field/entity as a whole, overriding the type-based default (e.g. 'action-list-editor', 'ability-score-stepper')."
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label override for this field."
+        },
+        "placeholder": {
+          "type": "string",
+          "description": "Placeholder text hint for text-like widgets."
+        },
+        "hidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to omit this field from generated editor forms."
+        },
+        "readonly": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field should render as non-editable (e.g. a value derived from 'calculated_properties' or from other fields, like 'level' being derived from 'class_levels')."
+        },
+        "order": {
+          "type": "number",
+          "description": "Sort order hint relative to sibling fields."
+        },
+        "config": {
+          "type": "object",
+          "description": "Arbitrary options passed through to the resolved widget template (e.g. { \"maxItems\": 20 }).",
+          "additionalProperties": true
+        },
+        "fields": {
+          "type": "object",
+          "description": "UI descriptors for nested child properties, keyed by property name. Only used when no 'widget' is set (or the widget itself recurses into 'fields').",
+          "additionalProperties": {
+            "$ref": "#/$defs/uiFieldDescriptor"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

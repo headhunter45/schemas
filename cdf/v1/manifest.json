@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.ttrpgwith.me/manifest.json",
+  "title": "RulesetManifest",
+  "description": "Schema for a ruleset manifest file (e.g. manifest.json), declaring ruleset identity, metadata, available entity types, rendering/editing templates, and static assets.",
+  "type": "object",
+  "required": ["id", "name", "version", "entities"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Ruleset identifier: either a unique UUID or a short slug ID (e.g. 'open5e', 'dnd5e', 'pathfinder2e').",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "uuid": {
+      "type": "string",
+      "description": "Optional unique UUID identifier for the ruleset when 'id' is a human-readable slug."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable display title of the ruleset (e.g. 'Open5e SRD Ruleset')."
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of the ruleset package (e.g. '1.0.0')."
+    },
+    "description": {
+      "type": "string",
+      "description": "A summary or full description of the ruleset."
+    },
+    "author": {
+      "description": "Primary author or organization responsible for this ruleset.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "email": { "type": "string" },
+            "url": { "type": "string" }
+          },
+          "required": ["name"]
+        }
+      ]
+    },
+    "authors": {
+      "type": "array",
+      "description": "List of authors or contributors.",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "email": { "type": "string" },
+              "url": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        ]
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "License under which this ruleset is published (e.g. 'OGL 1.0a', 'CC-BY-4.0', 'MIT')."
+    },
+    "homepage": {
+      "type": "string",
+      "description": "URL to the project homepage or documentation."
+    },
+    "entities": {
+      "description": "Available entity types defined by this ruleset. May be an array of entity descriptors or a dictionary mapping entity type IDs to descriptors.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entityDescriptor"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/entityDescriptor"
+          }
+        }
+      ]
+    },
+    "templates": {
+      "description": "Templates available for rendering, editing, and displaying entities in this ruleset.",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/templateDescriptor"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/templateDescriptor"
+          }
+        }
+      ]
+    },
+    "assets": {
+      "description": "Static assets (images, icons, fonts) associated with this ruleset and its templates.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Base relative directory containing static assets (e.g. 'assets' or 'images').",
+          "default": "assets"
+        },
+        "images": {
+          "type": "array",
+          "description": "List of image files or patterns used by templates.",
+          "items": { "type": "string" }
+        },
+        "fonts": {
+          "type": "array",
+          "description": "List of font files used by templates.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependencies": {
+      "type": "array",
+      "description": "Dependencies on other rulesets (e.g. base ruleset for an expansion).",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "version": { "type": "string" },
+          "optional": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Ruleset-level configuration options and defaults.",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "entityDescriptor": {
+      "type": "object",
+      "description": "Declaration of an entity type within the ruleset.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this entity type (e.g. 'character', 'monster', 'spell', 'item')."
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable name of the entity type (e.g. 'Player Character')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of what this entity type represents."
+        },
+        "schema": {
+          "type": "string",
+          "description": "Relative path to the JSON schema file that defines this entity type's properties (e.g. 'entities/character.json')."
+        },
+        "default_template": {
+          "type": "string",
+          "description": "Identifier of the default template (mode 'sheet'/'view'/'card'/'print') used to display this entity type."
+        },
+        "templates": {
+          "type": "array",
+          "description": "List of template IDs associated with this entity type.",
+          "items": { "type": "string" }
+        },
+        "default_editor": {
+          "type": "string",
+          "description": "Identifier of the default template (mode 'edit') used to author/edit this entity type."
+        },
+        "allowed_editors": {
+          "type": "array",
+          "description": "Template IDs (mode 'edit') that are compatible with this entity type.",
+          "items": { "type": "string" }
+        },
+        "icon": {
+          "type": "string",
+          "description": "Relative path to an icon image or an icon identifier."
+        },
+        "color": {
+          "type": "string",
+          "description": "Theme color associated with this entity type."
+        }
+      },
+      "required": ["schema"]
+    },
+    "templateDescriptor": {
+      "type": "object",
+      "description": "Declaration of a template used for rendering and editing entities.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this template (e.g. 'character_sheet', 'spell_card')."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the template (e.g. 'Standard Character Sheet')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the template and its intended use."
+        },
+        "entity_types": {
+          "type": "array",
+          "description": "Entity types supported by this template.",
+          "items": { "type": "string" }
+        },
+        "mode": {
+          "type": "string",
+          "description": "Target mode of the template. 'sheet'/'view'/'card'/'print' are read-only display templates. 'edit' is a full entity editor form. 'widget' is a reusable field-level editor partial (referenced by 'ui.widget' in entity definitions and by other templates via {{> widgetId}}) rather than a directly requestable page.",
+          "default": "sheet"
+        },
+        "engine": {
+          "type": "string",
+          "description": "Template rendering engine or format (e.g. 'html', 'handlebars', 'mustache', 'webcomponent').",
+          "default": "html"
+        },
+        "html": {
+          "type": "string",
+          "description": "Relative path to the HTML template file (e.g. 'templates/character_sheet.html')."
+        },
+        "css": {
+          "description": "Relative path(s) to CSS stylesheets for this template.",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          ]
+        },
+        "js": {
+          "description": "Relative path(s) to JavaScript scripts for this template.",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          ]
+        },
+        "config": {
+          "description": "Template-specific configuration data or path to a JSON configuration file.",
+          "oneOf": [
+            { "type": "string" },
+            { "type": "object", "additionalProperties": true }
+          ]
+        }
+      },
+      "required": ["html"]
+    }
+  }
+}
